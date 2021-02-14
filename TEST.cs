@@ -54,6 +54,7 @@ namespace DSPMOD
                 //System.Console.WriteLine("Refreshed");
                 bool TideLockFound = false;
                 bool CloseMagFound = false;
+                bool SuperStarFound = false;
                 string sTideLock = "潮汐锁定";
                 var vResourceType = new string[] { "无", "铁矿", "铜矿", "硅矿", "钛矿", "石矿", "煤矿", "石油", "可燃冰", "金伯利", "分形硅", "有机晶", "光栅石", "刺笋", "磁石" };
                 var vPlanetType = new string[] { "None", "Vocano", "Ocean", "Desert", "Ice", "Gas", };
@@ -94,7 +95,7 @@ namespace DSPMOD
                     {
                         BlackHoleDistance = StarList[StarIndex].position.magnitude;
                         BlackHoleMagCount += PlanetList[0].veinSpotsSketch[14];
-                        if (BlackHoleDistance < 10)
+                        if (BlackHoleDistance < 6)
                         {
                             CloseMagFound = true;
                         }
@@ -104,7 +105,7 @@ namespace DSPMOD
                     {
                         NeutronStarDistance = StarList[StarIndex].position.magnitude;
                         NeutronStarMagCount += PlanetList[0].veinSpotsSketch[14];
-                        if (NeutronStarDistance < 10)
+                        if (NeutronStarDistance < 6)
                         {
                             CloseMagFound = true;
                         }
@@ -113,21 +114,40 @@ namespace DSPMOD
                     if (StarList[StarIndex].position.magnitude < 6 && StarIndex != 0)
                     {
                         NearStar++;
+                        bool IsSuperStar = true;
+                        var vLocalRare = new int[16];
                         foreach (PlanetData oPlanet in PlanetList)
                         {
                             if (oPlanet.type != EPlanetType.Gas)
                             {
                                 for (int RareIndex = 0; RareIndex < vRareCount.Length; RareIndex++)
                                 {
+                                    vLocalRare[RareIndex] += oPlanet.veinSpotsSketch[RareIndex];
                                     vRareCount[RareIndex] += oPlanet.veinSpotsSketch[RareIndex];
                                 }
                             }
                             if (oPlanet.theme == 13)
                             {
                                 AcidCount += 1;
+                                vLocalRare[15] += 1;
                             }
 
                         }
+
+
+                        for (int index3 = 1; index3 < vLocalRare.Length; index3++)
+                        {
+                            if (vLocalRare[index3] == 0 && index3 != 14)
+                            {
+                                IsSuperStar = false;
+                            }
+                        }
+
+                        if (IsSuperStar)
+                        {
+                            SuperStarFound = true;
+                        }
+
                     }
                 }
 
@@ -146,7 +166,9 @@ namespace DSPMOD
                 }
                 sRareCount += AcidCount;
 
-                if (TideLockFound && CloseMagFound)
+
+                //if (TideLockFound && CloseMagFound)
+                if (SuperStarFound && TideLockFound && CloseMagFound)
                 {
                     System.Console.WriteLine("种子: " + Seed);
                     //System.Console.WriteLine("初始恒星: " + BirthStarName);
